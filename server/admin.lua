@@ -1,13 +1,12 @@
 --[[ Admin item spawner (integrated from w2f_adminspawner, Wayy2Flyyy).
      /adminitems opens the AdminItems shop: every defined item that has an
      images/<name>.png, priced at $0. Admin-gated (ACE group.admin / w2finv.admin
-     or qbx_core:HasGroup). ]]
+     or the active framework's admin group via Framework.IsAdmin). ]]
 
 local Config = {
     command   = 'adminitems',
     shopId    = 'AdminItems',
     shopLabel = 'Admin Item Spawner',
-    qbxAdminGroups = { admin = 0, god = 0 },
 }
 
 local function isAdmin(src)
@@ -15,8 +14,7 @@ local function isAdmin(src)
         or IsPlayerAceAllowed(src, ('command.%s'):format(Config.command)) then
         return true
     end
-    local ok, result = pcall(function() return exports.qbx_core:HasGroup(src, Config.qbxAdminGroups) end)
-    return ok and result == true
+    return Framework.IsAdmin(src)
 end
 
 local function itemHasImage(name)
@@ -47,7 +45,7 @@ local function buildAdminShop()
 end
 
 CreateThread(function()
-    while not WInv or not ItemData then Wait(100) end
+    while not WInv or not ItemData do Wait(100) end
     Wait(500)
     buildAdminShop()
 end)

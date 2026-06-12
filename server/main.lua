@@ -432,7 +432,7 @@ local applyingMoney = {}
 moneySync = function(inv)
     local src = inv.id
     if type(src) ~= 'number' or applyingMoney[src] then return end
-    local player = exports.qbx_core:GetPlayer(src)
+    local player = Framework.GetPlayer(src)
     if not player then return end
     local counts = accountCounts(inv)
     for account in pairs(IsAccountItem) do
@@ -453,11 +453,7 @@ local function applyMoneyFromFramework(src, account, amount)
 end
 
 local function loadPlayerRow(citizenid, cb)
-    MySQL.scalar('SELECT inventory FROM players WHERE citizenid = ?', { citizenid }, function(data)
-        if not data then return cb({}) end
-        local ok, decoded = pcall(json.decode, data)
-        cb(ok and type(decoded) == 'table' and decoded or {})
-    end)
+    Framework.LoadInventory(citizenid, cb)
 end
 
 saveInventory = function(inv)
@@ -469,7 +465,7 @@ saveInventory = function(inv)
                 out[#out + 1] = { name = slot.name, count = slot.count, slot = slotId, metadata = slot.metadata }
             end
         end
-        MySQL.update('UPDATE players SET inventory = ? WHERE citizenid = ?', { json.encode(out), inv.owner })
+        Framework.SaveInventory(inv.owner, json.encode(out))
         inv.changed = false
     elseif inv.type == 'stash' then
         local out = {}
@@ -537,7 +533,7 @@ local function setupPlayer(playerData)
 end
 
 local function gatherPlayerData(src)
-    local player = exports.qbx_core:GetPlayer(src)
+    local player = Framework.GetPlayer(src)
     if not player then return nil end
     local pd = player.PlayerData
     local groups = {}
@@ -553,8 +549,7 @@ local function gatherPlayerData(src)
     }
 end
 
-RegisterNetEvent('QBCore:Server:PlayerLoaded', function(player)
-    local src = type(player) == 'table' and (player.PlayerData and player.PlayerData.source or player.source) or source
+Framework.RegisterPlayerLoaded(function(src)
     if not src then return end
     local data = gatherPlayerData(src)
     if data then setupPlayer(data) end
@@ -579,10 +574,9 @@ local function playerDropped(src)
     Inventories[src] = nil
     applyingMoney[src] = nil
 end
-AddEventHandler('qbx_core:server:playerLoggedOut', playerDropped)
-AddEventHandler('playerDropped', function() playerDropped(source) end)
+Framework.RegisterPlayerDropped(playerDropped)
 
-AddEventHandler('qbx_core:server:onGroupUpdate', function(src, groupName, grade)
+Framework.RegisterGroupUpdate(function(src, groupName, grade)
     local inv = Inventories[src]
     if inv and inv.player then
         inv.player.groups = inv.player.groups or {}
@@ -594,11 +588,11 @@ AddEventHandler('onResourceStart', function(res)
     if res ~= CurrentResource then return end
 
     MySQL.query([[CREATE TABLE IF NOT EXISTS w2f_stashes (name VARCHAR(100) NOT NULL, data LONGTEXT, PRIMARY KEY (name))]])
-    MySQL.query([[ALTER TABLE players ADD COLUMN IF NOT EXISTS inventory LONGTEXT]])
+    Framework.EnsureSchema()
     SetTimeout(1000, function()
-        local players = exports.qbx_core:GetQBPlayers()
-        for src in pairs(players or {}) do
-            local data = gatherPlayerData(tonumber(src) or src)
+        local players = Framework.GetPlayers()
+        for i = 1, #players do
+            local data = gatherPlayerData(players[i])
             if data then setupPlayer(data) end
         end
     end)
@@ -976,8 +970,8 @@ exports('ConvertItems', function() end)
 
 exports('addCash', function() end)
 exports('removeCash', function() end)
-exports('getCash', function(src) local p = exports.qbx_core:GetPlayer(src); return p and p.PlayerData.money.cash or 0 end)
-exports('getBank', function(src) local p = exports.qbx_core:GetPlayer(src); return p and p.PlayerData.money.bank or 0 end)
+exports('getCash', function(src) local p = Framework.GetPlayer(src); return p and p.PlayerData.money.cash or 0 end)
+exports('getBank', function(src) local p = Framework.GetPlayer(src); return p and p.PlayerData.money.bank or 0 end)
 exports('giveCard', function() end)
 exports('getCards', function() return {} end)
 exports('displayMetadata', function() end)

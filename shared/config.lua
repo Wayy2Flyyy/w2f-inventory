@@ -5,9 +5,24 @@ local function jsonConvar(name, default)
     return json.decode(default)
 end
 
+-- Resolve the active framework. Accepts an explicit value (qbx|qb|esx) via the
+-- `inventory:framework` convar, or 'auto' (default) to detect it from whichever
+-- core resource is present. Explicit is recommended when start order is unusual.
+local function resolveFramework()
+    local fw = GetConvar('inventory:framework', 'auto'):lower()
+    if fw == 'qbox' then fw = 'qbx' end
+    if fw == 'qb-core' or fw == 'qbcore' then fw = 'qb' end
+    if fw == 'es_extended' then fw = 'esx' end
+    if fw ~= 'auto' then return fw end
+    if GetResourceState('qbx_core') == 'started' then return 'qbx' end
+    if GetResourceState('qb-core') == 'started' then return 'qb' end
+    if GetResourceState('es_extended') == 'started' then return 'esx' end
+    return 'qbx'
+end
+
 Config = {
 
-    framework   = GetConvar('inventory:framework', 'qbx'),
+    framework   = resolveFramework(),
 
     playerSlots = GetConvarInt('inventory:slots', 50),
     playerWeight= GetConvarInt('inventory:weight', 85000),
