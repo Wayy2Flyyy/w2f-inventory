@@ -9,8 +9,6 @@
 [![Framework](https://img.shields.io/badge/Qbox-supported-3b82f6?style=flat-square)](#-framework-support)
 [![Framework](https://img.shields.io/badge/QBCore-supported-22c55e?style=flat-square)](#-framework-support)
 [![Framework](https://img.shields.io/badge/ESX-supported-f59e0b?style=flat-square)](#-framework-support)
-[![ox_lib](https://img.shields.io/badge/built%20with-ox__lib-111827?style=flat-square)](https://github.com/overextended/ox_lib)
-[![API](https://img.shields.io/badge/API-ox__inventory%20compatible-8b5cf6?style=flat-square)](#-drop-in-compatibility)
 
 </div>
 
