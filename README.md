@@ -4,9 +4,11 @@
 
 **A fast, modern slot & weight inventory for FiveM — one resource, three frameworks.**
 
-[![Qbox](https://img.shields.io/badge/Qbox-✓-3b82f6?style=flat-square)](#framework)
-[![QBCore](https://img.shields.io/badge/QBCore-✓-22c55e?style=flat-square)](#framework)
-[![ESX](https://img.shields.io/badge/ESX-✓-f59e0b?style=flat-square)](#framework)
+**One inventory. Three frameworks. Zero rewrites.**
+
+[![Framework](https://img.shields.io/badge/Qbox-supported-3b82f6?style=flat-square)](#-framework-support)
+[![Framework](https://img.shields.io/badge/QBCore-supported-22c55e?style=flat-square)](#-framework-support)
+[![Framework](https://img.shields.io/badge/ESX-supported-f59e0b?style=flat-square)](#-framework-support)
 
 </div>
 
