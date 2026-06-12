@@ -19,7 +19,7 @@ end
 local function canAccess(src, inv)
     if not inv then return false end
     if inv.groups then
-        local player = exports.qbx_core:GetPlayer(src)
+        local player = Framework.GetPlayer(src)
         if not player then return false end
         local job = player.PlayerData.job
         local gang = player.PlayerData.gang
@@ -43,7 +43,8 @@ lib.callback.register('wf_inventory:open', function(src, invType, data)
         local id = type(data) == 'table' and (data.id or data[1]) or data
         local def = WInv.RegisteredStashes[id]
         if not def then return false end
-        local owner = def.owner == true and (exports.qbx_core:GetPlayer(src).PlayerData.citizenid) or nil
+        local ownerPlayer = def.owner == true and Framework.GetPlayer(src) or nil
+        local owner = ownerPlayer and ownerPlayer.PlayerData.citizenid or nil
         inv = WInv.resolveStash(id, owner)
     elseif invType == 'shop' then
         local shopType = type(data) == 'table' and (data.type or data.id) or data
@@ -276,9 +277,8 @@ lib.callback.register('wf_inventory:useItem', function(src, slotId)
     TriggerEvent('ox_inventory:usedItem', src, slot.name, slotId, slot.metadata)
 
     -- the framework usable-item callback owns the anim, removal and effects
-    local cb
-    local ok = pcall(function() cb = exports.qbx_core:CanUseItem(slot.name) end)
-    if ok and cb then
+    local cb = Framework.CanUseItem(slot.name)
+    if cb then
         pcall(cb, src, item)
         return { used = true }
     end
@@ -302,8 +302,7 @@ lib.callback.register('wf_inventory:useFallback', function(src, slotId)
     local inv = getInv(src); if not inv then return false end
     local slot = inv.items[slotId]; if not slot then return false end
     local def = GetItemData(slot.name)
-    local okCb, cb = pcall(function() return exports.qbx_core:CanUseItem(slot.name) end)
-    if okCb and cb then return false end
+    if Framework.CanUseItem(slot.name) then return false end
     local consume = def.consume
     if consume == nil then consume = 1 end
     if consume ~= 0 then
@@ -311,7 +310,7 @@ lib.callback.register('wf_inventory:useFallback', function(src, slotId)
     end
     local st = def.client and def.client.status
     if st then
-        local player = exports.qbx_core:GetPlayer(src)
+        local player = Framework.GetPlayer(src)
         if player then
             local md = player.PlayerData.metadata or {}
             if st.hunger then player.Functions.SetMetaData('hunger', math.min(100, (md.hunger or 0) + st.hunger / 10000)) end
@@ -382,7 +381,7 @@ lib.callback.register('wf_inventory:buyItem', function(src, data)
     end
     if price > 0 then
         if method == 'bank' then
-            local player = exports.qbx_core:GetPlayer(src)
+            local player = Framework.GetPlayer(src)
             if not player or (player.PlayerData.money.bank or 0) < price then
                 TriggerClientEvent('ox_inventory:notify', src, { type = 'error', description = 'Not enough on card' })
                 return false
@@ -431,7 +430,7 @@ lib.callback.register('wf_inventory:checkout', function(src, data)
     end
 
     local method = data.payment == 'bank' and 'bank' or 'cash'
-    local player = exports.qbx_core:GetPlayer(src)
+    local player = Framework.GetPlayer(src)
     if not player then return false end
 
     if total > 0 then
@@ -454,7 +453,7 @@ lib.callback.register('wf_inventory:checkout', function(src, data)
         WInv.addItem(inv, lines[i].name, lines[i].count, lines[i].metadata)
     end
 
-    local p2 = exports.qbx_core:GetPlayer(src)
+    local p2 = Framework.GetPlayer(src)
     local cash = WInv.getItemCount(inv, 'money')
     local bank = p2 and p2.PlayerData.money.bank or 0
     TriggerClientEvent('ox_inventory:notify', src, { type = 'success', description = ('Purchase complete — $%d'):format(total) })

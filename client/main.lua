@@ -11,12 +11,12 @@ local function ped() return PlayerPedId() end
 local function nui(action, data) SendNUIMessage({ action = action, data = data }) end
 
 local function sendMoney()
-    local ok, pd = pcall(function() return exports.qbx_core:GetPlayerData() end)
-    if ok and pd and pd.money then
-        nui('money', { cash = pd.money.cash or 0, bank = pd.money.bank or 0 })
+    local money = Framework.GetMoney()
+    if money then
+        nui('money', { cash = money.cash or 0, bank = money.bank or 0 })
     end
 end
-RegisterNetEvent('QBCore:Client:OnMoneyChange', function() if invOpen then sendMoney() end end)
+Framework.RegisterMoneyChange(function() if invOpen then sendMoney() end end)
 
 local function slotList(items)
 
@@ -351,7 +351,7 @@ exports('ProgressActive', function() return lib.progressActive() end)
 exports('CancelProgress', function() return lib.cancelProgress() end)
 exports('Keyboard', function(...) return lib.inputDialog(...) end)
 
-RegisterNetEvent('qbx_core:client:onGroupUpdate', function(groupName, grade)
+Framework.RegisterGroupUpdate(function(groupName, grade)
     PlayerData.groups = PlayerData.groups or {}
     PlayerData.groups[groupName] = grade
 end)
