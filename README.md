@@ -1,5 +1,9 @@
 # w2f-inventory
 
+<img width="923" height="465" alt="image" src="https://github.com/user-attachments/assets/2e7be454-1285-4d45-8822-830b909b67f2" />
+<img width="1204" height="668" alt="image" src="https://github.com/user-attachments/assets/ade673e0-dd65-48d1-8052-4b553296764e" />
+
+
 ## Installation
 
 1. Drop `w2f-inventory` into your `resources` folder.
